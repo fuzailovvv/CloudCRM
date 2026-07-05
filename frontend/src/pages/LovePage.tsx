@@ -1,7 +1,5 @@
-import { ChangeEvent, useState } from 'react';
-import { Heart, LogOut, Sparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { clearLoveAccess } from '../auth/loveAuth';
+import { ChangeEvent, useEffect, useState } from 'react';
+import { Heart } from 'lucide-react';
 
 const MEMORY_IMAGE_CANDIDATES = [
   ['/love/photo_2026-07-05_15-01-21.jpg'],
@@ -27,17 +25,20 @@ Bilmadim, u meni nimamga uchdi — yaxshi ko'rib qoldi. Oradan oz vaqt o'tib men
 ];
 
 export default function LovePage() {
-  const navigate = useNavigate();
   const [candidateIndex, setCandidateIndex] = useState([0, 0]);
   const [missingPublicPhotos, setMissingPublicPhotos] = useState([false, false]);
+  const [showMedia, setShowMedia] = useState(true);
   const [storedPhotos, setStoredPhotos] = useState<(string | null)[]>(() =>
     PHOTO_STORAGE_KEYS.map((key) => localStorage.getItem(key))
   );
 
-  const handleLogout = () => {
-    clearLoveAccess();
-    navigate('/');
-  };
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setShowMedia(false);
+    }, 60000);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const handleImageError = (index: number) => {
     if (storedPhotos[index]) {
@@ -92,47 +93,41 @@ export default function LovePage() {
   };
 
   return (
-    <main className="love-screen love-page">
-      <div className="hearts" aria-hidden>
-        <span className="heart" style={{ left: '8%', top: '86%', ['--x' as any]: '32px', animationDelay: '0s' }} />
-        <span className="heart heart-soft" style={{ left: '22%', top: '82%', ['--x' as any]: '70px', animationDelay: '0.35s' }} />
-        <span className="heart" style={{ left: '41%', top: '88%', ['--x' as any]: '46px', animationDelay: '0.9s' }} />
-        <span className="heart heart-soft" style={{ left: '63%', top: '84%', ['--x' as any]: '88px', animationDelay: '1.25s' }} />
-        <span className="heart" style={{ left: '82%', top: '87%', ['--x' as any]: '54px', animationDelay: '1.7s' }} />
-      </div>
+    <main className="love-screen love-page love-page--personal">
+      <div className="page-orb page-orb-one" aria-hidden />
+      <div className="page-orb page-orb-two" aria-hidden />
 
-      <article className="love-story-shell" aria-label="Love page">
+      <article className="love-story-shell personal-shell" aria-label="Personal page">
         <header className="love-story-header">
           <div className="love-icon-row" aria-hidden>
-            <Sparkles size={22} />
-            <Heart size={46} />
-            <Sparkles size={22} />
+            <Heart size={22} className="animated-heart-icon" />
+            <Heart size={22} className="animated-heart-icon animated-heart-icon-delay" />
           </div>
-          <p className="love-kicker">2020-yil 10-aprel</p>
-          <p>Bu sahifa men eslab qolishni xohlagan narsalar uchun.</p>
+          <p className="love-kicker">Private archive</p>
         </header>
 
-        <section className="memory-gallery-row" aria-label="Ikki rasm">
-          {[0, 1].map((index) => {
-            const photoSource = getPhotoSource(index);
+        {showMedia && (
+          <section className="memory-gallery-row media-fade-in" aria-label="Ikki rasm">
+            {[0, 1].map((index) => {
+              const photoSource = getPhotoSource(index);
 
-            if (photoSource) {
+              if (photoSource) {
+                return (
+                  <figure className="memory-photo-card side-by-side media-card" key={index}>
+                    <img src={photoSource} alt={`Xotira rasmi ${index + 1}`} onError={() => handleImageError(index)} />
+                  </figure>
+                );
+              }
+
               return (
-                <figure className="memory-photo-card side-by-side" key={index}>
-                  <img src={photoSource} alt={`Xotira rasmi ${index + 1}`} onError={() => handleImageError(index)} />
-                </figure>
+                <label className="memory-photo-upload side-by-side media-card" key={index}>
+                  <span>{index + 1}-rasmni tanlash</span>
+                  <input type="file" accept="image/*" onChange={(event) => handlePhotoUpload(index, event)} />
+                </label>
               );
-            }
-
-            return (
-              <label className="memory-photo-upload side-by-side" key={index}>
-                <Heart size={28} />
-                <span>{index + 1}-rasmni tanlash</span>
-                <input type="file" accept="image/*" onChange={(event) => handlePhotoUpload(index, event)} />
-              </label>
-            );
-          })}
-        </section>
+            })}
+          </section>
+        )}
 
         <section className="memory-text memory-story" aria-label="Esingdami xotira">
           {MEMORY_PARAGRAPHS.map((paragraph, idx) => (
@@ -142,9 +137,14 @@ export default function LovePage() {
           ))}
         </section>
 
-        <div className="main-love-wrap" aria-hidden>
-          <img src="/love/love.jpg" alt="Love" className="main-love-image" />
-        </div>
+        {showMedia && (
+          <figure className="main-love-wrap media-fade-in main-love-figure" aria-label="Memory image and caption">
+            <img src="/love/love.jpg" alt="Love" className="main-love-image" />
+            <figcaption className="main-love-caption">
+              (chat ochirganimi hisobiga bitta rasimin qogan uni ozim AI da yonma yon qildirvoldim ))
+            </figcaption>
+          </figure>
+        )}
 
         <section className="memory-text memory-letter bottom-text" aria-label="Xotira matni">
           {USER_LONG_TEXT.split('\n\n').map((paragraph, idx) => (
@@ -154,10 +154,6 @@ export default function LovePage() {
           ))}
         </section>
 
-        <button type="button" className="ghost-button story-back-button" onClick={handleLogout}>
-          <LogOut size={17} />
-          Back to login
-        </button>
       </article>
     </main>
   );

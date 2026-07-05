@@ -27,26 +27,21 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="love-screen">
-      <div className="login-wrap">
-        <div className="hearts" aria-hidden>
-          <span className="heart" style={{ left: '12%', top: '78%', ['--x' as any]: '24px', animationDelay: '0s' }} />
-          <span className="heart heart-soft" style={{ left: '31%', top: '84%', ['--x' as any]: '58px', animationDelay: '0.5s' }} />
-          <span className="heart" style={{ left: '52%', top: '82%', ['--x' as any]: '34px', animationDelay: '1s' }} />
-          <span className="heart heart-soft" style={{ left: '74%', top: '86%', ['--x' as any]: '76px', animationDelay: '1.4s' }} />
-          <span className="heart" style={{ left: '90%', top: '80%', ['--x' as any]: '42px', animationDelay: '1.9s' }} />
-        </div>
+    <main className="love-screen love-page--personal">
+      <div className="page-orb page-orb-one" aria-hidden />
+      <div className="page-orb page-orb-two" aria-hidden />
 
+      <div className="login-wrap">
         <section className="login-hero" aria-label="Login">
           <div className="login-mark">
-            <Heart size={30} />
+            <Heart size={30} className="animated-heart-icon" />
           </div>
           <h1>Just open it once and read it, please.</h1>
           <p>The right words open the next page.</p>
         </section>
 
         <section className="login-card">
-          <h2>Welcome back</h2>
+          <h2>Enter the private page</h2>
 
           {error && (
             <div className="login-error" role="alert">
@@ -86,8 +81,7 @@ export default function LoginPage() {
             </label>
 
             <button type="submit" className="love-button">
-              <Heart size={18} />
-              Open love page
+              Open personal page
             </button>
           </form>
 
@@ -96,11 +90,11 @@ export default function LoginPage() {
             <p>The name I saved you under in my contacts</p>
             <p>Login : Q**x*r Q***m</p>
             <p>You used to start every morning like this</p>
-            <p>Password : h*****</p>
+            <p>password : (Assalomu aleykum) h*****</p>
           </div>
         </section>
 
-        <p className="login-foot">Made with love</p>
+        <p className="login-foot">Made for a private archive</p>
       </div>
     </main>
   );
