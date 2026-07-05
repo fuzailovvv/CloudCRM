@@ -211,6 +211,12 @@ jobs:
             export IMAGE_TAG=${{ needs.build.outputs.image-tag }}
             export REGISTRY=ghcr.io/$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
 
+            # ── 6.5. Reclaim Docker space before pulling new images ──
+            # The backend image is large enough that the host can run out of overlayfs space
+            # if old images and build cache are still present.
+            sudo docker builder prune -af || true
+            sudo docker image prune -af || true
+
             # Write full .env for docker compose (no leading spaces)
             cat > .env << EOF
             IMAGE_TAG=${IMAGE_TAG}
