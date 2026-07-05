@@ -1,5 +1,5 @@
 # BTEC D.P7 & D.P8 — CI/CD Pipeline
-# Stages: lint → test → build → deploy
+# Stages: lint → smoke-test → build → deploy
 
 name: CI/CD Pipeline
 
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Cache npm dependencies
         uses: actions/cache@v4
@@ -53,7 +53,34 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
-  # (Tests removed) Stage 2 was previously the Test job; CI now skips tests and proceeds to build
+  # ─────────────────────────────────────────
+  # Stage 2: Docker Smoke Test
+  # Start the stack and confirm the app responds before building/pushing images
+  # ─────────────────────────────────────────
+  smoke-test:
+    name: Docker Smoke Test
+    runs-on: ubuntu-latest
+    needs: lint
+    env:
+      HTTP_PORT: "8080"
+      HTTPS_PORT: "8443"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Docker stack
+        run: docker compose up -d --build postgres backend frontend nginx
+
+      - name: Wait for app health
+        run: |
+          timeout 300 sh -c 'until curl -fsS http://127.0.0.1:8080/api/health >/dev/null; do sleep 5; done'
+
+      - name: Show container status
+        if: always()
+        run: docker compose ps
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose down -v --remove-orphans
 
   # ─────────────────────────────────────────
   # Stage 3: Build Docker Images
@@ -61,7 +88,7 @@ jobs:
   build:
     name: Build & Push Images
     runs-on: ubuntu-latest
-    needs: lint
+    needs: smoke-test
     if: github.event_name == 'push'
     permissions:
       contents: read
