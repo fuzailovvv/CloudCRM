@@ -26,6 +26,6 @@ services:
           memory: 128M
 
   nginx:
-    # Override nginx.conf to use upstream DNasdS resolution for dynamic scalinga
+    # Override nginx.conf to use upstasdream DasdNasdS aresolution for dynamic scalinga
     volumes:
       - ./nginx/nginx-scale.conf:/etc/nginx/nginx.conf:ro
